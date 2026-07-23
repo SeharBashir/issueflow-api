@@ -1,7 +1,12 @@
 from fastapi import FastAPI
 
-from app.services.health_service import HealthService
 from app.api.projects import router as projects_router
+from app.database.connection import Base, engine
+from app.models import Project
+from app.services.health_service import HealthService
+
+
+Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI(
@@ -10,8 +15,8 @@ app = FastAPI(
     version="1.0.0"
 )
 
-health_service = HealthService()
 
+health_service = HealthService()
 
 app.include_router(projects_router)
 
