@@ -1,8 +1,7 @@
-
 from sqlalchemy.orm import Session
 
 from app.models.issue import Issue
-from app.schemas.issue import IssueCreate
+from app.schemas.issue import IssueCreate, IssueUpdate
 
 
 class IssueRepository:
@@ -33,6 +32,16 @@ class IssueRepository:
 
         return db.query(Issue).all()
 
+    def get_by_id(
+        self,
+        db: Session,
+        issue_id: int
+    ) -> Issue | None:
+
+        return db.query(Issue).filter(
+            Issue.id == issue_id
+        ).first()
+
     def get_by_project_id(
         self,
         db: Session,
@@ -43,3 +52,30 @@ class IssueRepository:
             Issue.project_id == project_id
         ).all()
 
+    def update(
+        self,
+        db: Session,
+        issue: Issue,
+        issue_data: IssueUpdate
+    ) -> Issue:
+
+        update_data = issue_data.model_dump(
+            exclude_unset=True
+        )
+
+        for field, value in update_data.items():
+            setattr(issue, field, value)
+
+        db.commit()
+        db.refresh(issue)
+
+        return issue
+
+    def delete(
+        self,
+        db: Session,
+        issue: Issue
+    ) -> None:
+
+        db.delete(issue)
+        db.commit()

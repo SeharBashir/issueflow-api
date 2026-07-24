@@ -6,3 +6,10 @@ class IssueCreate(BaseModel):
     description: str | None = None
     priority: str = "medium"
     project_id: int
+
+
+class IssueUpdate(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    status: str | None = None
+    priority: str | None = None
