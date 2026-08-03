@@ -2,8 +2,14 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database.connection import get_db
-from app.schemas.issue import IssueCreate, IssueUpdate
+from app.schemas.issue import (
+    IssueCreate,
+    IssueUpdate,
+    IssueResponse
+)
 from app.services.issue_service import IssueService
+from app.core.security import get_current_user
+from app.models.user import User
 
 
 router = APIRouter(
@@ -15,10 +21,15 @@ router = APIRouter(
 issue_service = IssueService()
 
 
-@router.post("/", status_code=201)
+@router.post(
+    "/",
+    response_model=IssueResponse,
+    status_code=201
+)
 def create_issue(
     issue: IssueCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     return issue_service.create_issue(
         db=db,
@@ -26,17 +37,25 @@ def create_issue(
     )
 
 
-@router.get("/")
+@router.get(
+    "/",
+    response_model=list[IssueResponse]
+)
 def get_issues(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     return issue_service.get_all_issues(db)
 
 
-@router.get("/project/{project_id}")
+@router.get(
+    "/project/{project_id}",
+    response_model=list[IssueResponse]
+)
 def get_project_issues(
     project_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     return issue_service.get_issues_by_project(
         db=db,
@@ -44,10 +63,14 @@ def get_project_issues(
     )
 
 
-@router.get("/{issue_id}")
+@router.get(
+    "/{issue_id}",
+    response_model=IssueResponse
+)
 def get_issue(
     issue_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     return issue_service.get_issue_by_id(
         db=db,
@@ -55,11 +78,15 @@ def get_issue(
     )
 
 
-@router.put("/{issue_id}")
+@router.put(
+    "/{issue_id}",
+    response_model=IssueResponse
+)
 def update_issue(
     issue_id: int,
     issue_data: IssueUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     return issue_service.update_issue(
         db=db,
@@ -71,7 +98,8 @@ def update_issue(
 @router.delete("/{issue_id}")
 def delete_issue(
     issue_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     return issue_service.delete_issue(
         db=db,

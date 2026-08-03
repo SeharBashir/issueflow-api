@@ -5,3 +5,8 @@ __pycache__/
 *.db
 .pytest_cache/
 .vscode/
+.env
+.venv/
+issueflow.db
+__pycache__/
+*.pyc

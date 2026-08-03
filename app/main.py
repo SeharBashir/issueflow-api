@@ -1,11 +1,12 @@
 from fastapi import FastAPI
 
 from app.api.projects import router as projects_router
+from app.api.issues import router as issues_router
+from app.api.auth import router as auth_router
 from app.database.connection import Base, engine
 from app.models import Project
+from app.models.user import User
 from app.services.health_service import HealthService
-from app.api.issues import router as issues_router
-
 
 
 Base.metadata.create_all(bind=engine)
@@ -20,6 +21,7 @@ app = FastAPI(
 
 health_service = HealthService()
 
+app.include_router(auth_router)
 app.include_router(projects_router)
 app.include_router(issues_router)
 

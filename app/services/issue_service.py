@@ -1,9 +1,9 @@
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.repositories.issue_repository import IssueRepository
 from app.repositories.project_repository import ProjectRepository
 from app.schemas.issue import IssueCreate, IssueUpdate
+from app.core.exceptions import NotFoundException, BadRequestException
 
 
 class IssueService:
@@ -12,21 +12,45 @@ class IssueService:
         self.issue_repository = IssueRepository()
         self.project_repository = ProjectRepository()
 
+    def _get_project_or_404(
+        self,
+        db: Session,
+        project_id: int
+    ):
+        project = self.project_repository.get_by_id(
+            db=db,
+            project_id=project_id
+        )
+
+        if project is None:
+            raise NotFoundException("Project", project_id)
+
+        return project
+
+    def _get_issue_or_404(
+        self,
+        db: Session,
+        issue_id: int
+    ):
+        issue = self.issue_repository.get_by_id(
+            db=db,
+            issue_id=issue_id
+        )
+
+        if issue is None:
+            raise NotFoundException("Issue", issue_id)
+
+        return issue
+
     def create_issue(
         self,
         db: Session,
         issue: IssueCreate
     ):
-        project = self.project_repository.get_by_id(
+        self._get_project_or_404(
             db=db,
             project_id=issue.project_id
         )
-
-        if project is None:
-            raise HTTPException(
-                status_code=404,
-                detail="Project not found"
-            )
 
         return self.issue_repository.create(
             db=db,
@@ -44,16 +68,10 @@ class IssueService:
         db: Session,
         project_id: int
     ):
-        project = self.project_repository.get_by_id(
+        self._get_project_or_404(
             db=db,
             project_id=project_id
         )
-
-        if project is None:
-            raise HTTPException(
-                status_code=404,
-                detail="Project not found"
-            )
 
         return self.issue_repository.get_by_project_id(
             db=db,
@@ -65,18 +83,30 @@ class IssueService:
         db: Session,
         issue_id: int
     ):
-        issue = self.issue_repository.get_by_id(
+        return self._get_issue_or_404(
             db=db,
             issue_id=issue_id
         )
 
-        if issue is None:
-            raise HTTPException(
-                status_code=404,
-                detail="Issue not found"
-            )
+    def validate_status_transition(
+        self,
+        current_status: str,
+        new_status: str
+    ):
+        allowed_transitions = {
+            "open": ["in_progress"],
+            "in_progress": ["resolved"],
+            "resolved": ["closed", "in_progress"],
+            "closed": []
+        }
 
-        return issue
+        if new_status not in allowed_transitions[current_status]:
+            raise BadRequestException(
+                detail=(
+                    f"Cannot change status from "
+                    f"{current_status} to {new_status}"
+                )
+            )
 
     def update_issue(
         self,
@@ -84,15 +114,16 @@ class IssueService:
         issue_id: int,
         issue_data: IssueUpdate
     ):
-        issue = self.issue_repository.get_by_id(
+        issue = self._get_issue_or_404(
             db=db,
             issue_id=issue_id
         )
 
-        if issue is None:
-            raise HTTPException(
-                status_code=404,
-                detail="Issue not found"
+        if issue_data.status is not None:
+
+            self.validate_status_transition(
+                current_status=issue.status,
+                new_status=issue_data.status.value
             )
 
         return self.issue_repository.update(
@@ -106,16 +137,10 @@ class IssueService:
         db: Session,
         issue_id: int
     ):
-        issue = self.issue_repository.get_by_id(
+        issue = self._get_issue_or_404(
             db=db,
             issue_id=issue_id
         )
-
-        if issue is None:
-            raise HTTPException(
-                status_code=404,
-                detail="Issue not found"
-            )
 
         self.issue_repository.delete(
             db=db,

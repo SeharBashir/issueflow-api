@@ -15,7 +15,7 @@ class IssueRepository:
         issue = Issue(
             title=issue_data.title,
             description=issue_data.description,
-            priority=issue_data.priority,
+            priority=issue_data.priority.value,
             project_id=issue_data.project_id
         )
 
@@ -64,6 +64,10 @@ class IssueRepository:
         )
 
         for field, value in update_data.items():
+
+            if hasattr(value, "value"):
+                value = value.value
+
             setattr(issue, field, value)
 
         db.commit()

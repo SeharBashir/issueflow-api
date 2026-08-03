@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.models.project import Project
-from app.schemas.project import ProjectCreate
+from app.schemas.project import ProjectCreate, ProjectUpdate
 
 
 class ProjectRepository:
@@ -39,3 +39,29 @@ class ProjectRepository:
         return db.query(Project).filter(
             Project.id == project_id
         ).first()
+
+    def update(
+        self,
+        db: Session,
+        project: Project,
+        project_data: ProjectUpdate
+    ) -> Project:
+
+        update_data = project_data.model_dump(exclude_unset=True)
+
+        for field, value in update_data.items():
+            setattr(project, field, value)
+
+        db.commit()
+        db.refresh(project)
+
+        return project
+
+    def delete(
+        self,
+        db: Session,
+        project: Project
+    ) -> None:
+
+        db.delete(project)
+        db.commit()

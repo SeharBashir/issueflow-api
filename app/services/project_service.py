@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Session
 
 from app.repositories.project_repository import ProjectRepository
-from app.schemas.project import ProjectCreate
+from app.schemas.project import ProjectCreate, ProjectUpdate
+from app.core.exceptions import NotFoundException
 
 
 class ProjectService:
@@ -30,7 +31,44 @@ class ProjectService:
         db: Session,
         project_id: int
     ):
-        return self.repository.get_by_id(
+        project = self.repository.get_by_id(
             db=db,
             project_id=project_id
+        )
+
+        if project is None:
+            raise NotFoundException("Project", project_id)
+
+        return project
+
+    def update_project(
+        self,
+        db: Session,
+        project_id: int,
+        project_data: ProjectUpdate
+    ):
+        project = self.get_project_by_id(
+            db=db,
+            project_id=project_id
+        )
+
+        return self.repository.update(
+            db=db,
+            project=project,
+            project_data=project_data
+        )
+
+    def delete_project(
+        self,
+        db: Session,
+        project_id: int
+    ):
+        project = self.get_project_by_id(
+            db=db,
+            project_id=project_id
+        )
+
+        self.repository.delete(
+            db=db,
+            project=project
         )
