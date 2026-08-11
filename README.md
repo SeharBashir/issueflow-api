@@ -1,6 +1,6 @@
 # IssueFlow API
 
-IssueFlow is a backend API for team issue and incident management, built with FastAPI. It provides secure, authenticated CRUD operations for managing projects and issues.
+IssueFlow is a backend API for team issue and incident management, built with FastAPI. It provides secure, authenticated CRUD operations for managing projects and issues. A React frontend is included for demoing the API.
 
 ## Current Features
 
@@ -14,6 +14,7 @@ IssueFlow is a backend API for team issue and incident management, built with Fa
 - Environment-based configuration (`.env`)
 - Health check endpoint
 - Layered architecture (API → Services → Repositories → Models)
+- React frontend (landing page, auth, project & issue dashboard)
 
 ## Planned Features (Not Yet Implemented)
 
@@ -24,9 +25,11 @@ IssueFlow is a backend API for team issue and incident management, built with Fa
 - [ ] Analytics dashboard
 - [ ] PostgreSQL support (currently SQLite only)
 - [ ] Database migrations (Alembic)
+- [ ] Automated tests
 
 ## Technologies
 
+**Backend**
 - Python
 - FastAPI
 - SQLAlchemy
@@ -35,20 +38,26 @@ IssueFlow is a backend API for team issue and incident management, built with Fa
 - JWT (python-jose)
 - Passlib (bcrypt password hashing)
 - REST API
-- Git
+
+**Frontend**
+- React
+- Vite
+- React Router
 
 ## Project Structure
 
 ```
-app/
-├── api/            # Route handlers (Auth, Issues, Projects)
-├── core/           # Configuration, security utilities, custom exceptions
-├── database/       # Database connection setup
-├── models/         # SQLAlchemy ORM models
-├── repositories/   # Data access layer
-├── schemas/        # Pydantic schemas (request/response validation)
-├── services/       # Business logic layer
-└── main.py         # Application entry point
+IssueFlow/
+├── app/
+│   ├── api/            # Route handlers (Auth, Issues, Projects)
+│   ├── core/           # Configuration, security utilities, custom exceptions
+│   ├── database/       # Database connection setup
+│   ├── models/         # SQLAlchemy ORM models
+│   ├── repositories/   # Data access layer
+│   ├── schemas/        # Pydantic schemas (request/response validation)
+│   ├── services/       # Business logic layer
+│   └── main.py         # Application entry point
+└── frontend/            # React frontend (landing page + dashboard)
 ```
 
 ## Setup
@@ -60,7 +69,7 @@ python -m venv .venv
 .venv\Scripts\activate
 ```
 
-### 2. Install dependencies
+### 2. Install backend dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -82,7 +91,7 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
 Paste the output into the `SECRET_KEY` value in your `.env` file.
 
-### 4. Run the application
+### 4. Run the backend
 
 ```bash
 uvicorn app.main:app --reload
@@ -91,16 +100,26 @@ uvicorn app.main:app --reload
 The API will be available at `http://127.0.0.1:8000`.
 Interactive API docs (Swagger UI) available at `http://127.0.0.1:8000/docs`.
 
+### 5. Run the frontend (optional)
+
+In a separate terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend runs at `http://localhost:5173` and expects the backend to be running at `http://127.0.0.1:8000`. See `frontend/README.md` for details, including the CORS configuration required on the backend.
+
 ## Authentication
 
 Most endpoints require authentication. To use the API:
 
 1. Register a user via `POST /auth/register`
 2. Log in via `POST /auth/login` to receive an access token
-3. Include the token in subsequent requests as a header:
-   `Authorization: Bearer <your_token>`
-
-In Swagger UI, click the **Authorize** button and enter your credentials to test protected endpoints directly.
 
 
-
+In Swagger UI, click the **Authorize** button and enter your credentials to test protected endpoints directly. In the frontend, this is handled automatically after logging in.
+## Demo
+https://www.loom.com/share/28f333f5fddd424fbf4607ccadb9f159

@@ -10,3 +10,4 @@ __pycache__/
 issueflow.db
 __pycache__/
 *.pyc
+seed_projects.ps1
