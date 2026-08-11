@@ -95,13 +95,16 @@ def update_issue(
     )
 
 
-@router.delete("/{issue_id}")
+@router.delete(
+    "/{issue_id}",
+    status_code=204
+)
 def delete_issue(
     issue_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return issue_service.delete_issue(
+    issue_service.delete_issue(
         db=db,
         issue_id=issue_id
     )

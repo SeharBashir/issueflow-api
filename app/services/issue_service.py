@@ -146,7 +146,3 @@ class IssueService:
             db=db,
             issue=issue
         )
-
-        return {
-            "message": "Issue deleted successfully"
-        }

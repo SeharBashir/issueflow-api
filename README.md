@@ -102,9 +102,5 @@ Most endpoints require authentication. To use the API:
 
 In Swagger UI, click the **Authorize** button and enter your credentials to test protected endpoints directly.
 
-## Running Tests
 
-```bash
-pytest
-```
 
